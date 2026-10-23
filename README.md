@@ -1,15 +1,14 @@
 # Greenfield Academy — School Portal (Phase 1)
 
 A working school website with a **login page**, a session-protected **dashboard**, and **logout**.
-Built as Phase 1 of the broader School Management System architecture: identity, authentication,
-and a personalized dashboard shell. Later phases (academics, dormitory, cafeteria, finance)
-plug into this foundation.
 
-> Scope of this build: login → dashboard → logout. Role-specific modules (students, teachers,
-> dormitory, cafeteria, finance) are explicitly out of scope for this deliverable and would be
-> added as separate route handlers + dashboard sections in later phases.
+Built as Phase 1 of the broader School Management System architecture: identity, authentication, and a personalized dashboard shell. Later phases (academics, dormitory, cafeteria, finance) can build on this foundation.
+
+> **Scope:** Login → dashboard → logout. Role-specific modules (students, teachers, dormitory, cafeteria, finance) are planned for later phases.
 
 ---
+
+
 
 ## Stack & why
 
@@ -224,3 +223,6 @@ Per the architecture document, later phases plug into this shell:
 - **Phase 5 — Hardening:** MFA, audit logs, rate limiting, backups, accessibility audit
 
 Each phase adds Prisma models + new API route handlers + new dashboard sections — all gated by the same session check used here.
+=======
+# sms
+>>>>>>> aac50df053aad1e5a725b7f530c0eb1e692127ed
