@@ -1,0 +1,22 @@
+import { z } from "zod";
+
+/**
+ * Login form schema — used on BOTH the client (instant feedback) and the
+ * server (authoritative validation). The server route re-runs this on every
+ * request, never trusting the client.
+ */
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export const VALID_ROLES = ["ADMIN", "TEACHER", "STAFF", "STUDENT", "PARENT"] as const;
+export type UserRole = (typeof VALID_ROLES)[number];

@@ -1,0 +1,23 @@
+// School portal — Phase 1 (identity + auth)
+// The uploaded architecture document recommends a modular monolith with one
+// shared user table. We model that core here. Later phases (students, classes,
+// dormitory, cafeteria, finance) add linked tables that reference User.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  role         String   @default("STAFF") // ADMIN | TEACHER | STAFF | STUDENT | PARENT
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
