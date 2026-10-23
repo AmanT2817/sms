@@ -2,73 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  GraduationCap,
-  LogOut,
-  Loader2,
-  Calendar,
-  Mail,
-  FileText,
-  Clock,
-  Megaphone,
-  Users,
-  BookOpen,
-  type LucideIcon,
-} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, LogOut, GraduationCap, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-interface DashboardUser {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  roleLabel: string;
-}
-
-interface Announcement {
-  id: string;
-  title: string;
-  body: string;
-  date: string;
-}
-
-interface QuickAction {
-  id: string;
-  label: string;
-  icon: string;
-}
-
-interface DashboardData {
-  user: DashboardUser;
-  stats: { totalAccounts: number; term: string; schoolName: string };
-  announcements: Announcement[];
-  quickActions: QuickAction[];
-}
-
-const ACTION_ICONS: Record<string, LucideIcon> = {
-  calendar: Calendar,
-  mail: Mail,
-  form: FileText,
-  date: Clock,
-};
+import { Input } from "@/components/ui/input";
+import { Sidebar } from "./sidebar";
+import {
+  AdminDashboardSection,
+  StudentDashboardSection,
+  TeacherDashboardSection,
+  type DashboardData,
+} from "./role-views";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function initials(name: string): string {
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 }
 
 export function Dashboard() {
@@ -84,7 +36,6 @@ export function Dashboard() {
     try {
       const res = await fetch("/api/dashboard", { cache: "no-store" });
       if (res.status === 401) {
-        // Session invalid or expired — bounce back to login view.
         setData(null);
         router.refresh();
         return;
@@ -113,20 +64,37 @@ export function Dashboard() {
     } finally {
       setData(null);
       router.refresh();
-      // Force a full reload so all cached client state is cleared.
       window.location.href = "/";
     }
   }
 
+  // ── Loading state ──
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-        <span className="sr-only">Loading dashboard…</span>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="relative">
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <GraduationCap className="h-8 w-8 text-white" />
+            </div>
+            <motion.div
+              className="absolute -inset-2 rounded-2xl border-2 border-emerald-500/30"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              style={{ borderTopColor: "rgba(16, 185, 129, 0.8)" }}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">Loading your dashboard…</p>
+        </motion.div>
       </div>
     );
   }
 
+  // ── Error state ──
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -136,236 +104,124 @@ export function Dashboard() {
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={loadDashboard} variant="outline">
-              Retry
-            </Button>
+            <Button onClick={loadDashboard} variant="outline">Retry</Button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (!data) return null; // 401 path — router.refresh will swap view to login.
+  if (!data) return null;
 
-  const { user, stats, announcements, quickActions } = data;
+  const { user, stats } = data;
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
-      {/* Top bar */}
-      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
-              <GraduationCap className="h-5 w-5" />
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-semibold leading-tight">
-                {stats.schoolName}
-              </p>
-              <p className="text-xs text-muted-foreground leading-tight">
-                School Portal
-              </p>
+    <div className="min-h-screen flex bg-gradient-to-br from-background via-background to-emerald-50/30 dark:to-emerald-950/10">
+      <Sidebar
+        user={user}
+        schoolName={stats.schoolName}
+        onLogout={handleLogout}
+        loggingOut={loggingOut}
+      />
+
+      {/* ── Main content area ── */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Desktop top bar */}
+        <header className="hidden lg:flex sticky top-0 z-20 h-16 bg-background/80 backdrop-blur-xl border-b border-border items-center justify-between px-6">
+          <div className="flex items-center gap-3 flex-1 max-w-md">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search students, classes, assignments…"
+                className="pl-9 h-9 bg-muted/50 border-transparent focus-visible:bg-background"
+              />
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg relative">
+              <Bell className="h-4 w-4" />
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-background" />
+            </Button>
+            <ThemeToggle />
+            <div className="h-6 w-px bg-border mx-1" />
+            <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs font-medium">
+                <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-teal-500 text-white text-xs font-medium">
                   {initials(user.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="text-right">
                 <p className="text-sm font-medium leading-tight">{user.name}</p>
-                <p className="text-xs text-muted-foreground leading-tight">
-                  {user.email}
-                </p>
+                <p className="text-xs text-muted-foreground leading-tight">{user.roleLabel}</p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              disabled={loggingOut}
+          </div>
+        </header>
+
+        {/* ── Page content ── */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Greeting header */}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2"
             >
-              {loggingOut ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  {greeting}, {user.name.split(" ")[0]}!
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  <Badge variant="secondary" className="font-normal mr-2">
+                    {user.roleLabel}
+                  </Badge>
+                  {stats.term}
+                </p>
+              </div>
+              {/* Mobile logout (sidebar handles it on desktop) */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="lg:hidden self-start"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
-              )}
-              <span className="hidden sm:inline">Sign out</span>
-            </Button>
+                Sign out
+              </Button>
+            </motion.div>
+
+            {/* Role-specific content with page transition */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={user.role}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3 }}
+              >
+                {user.role === "STUDENT" && data.student && <StudentDashboardSection data={data} />}
+                {user.role === "TEACHER" && data.teacher && <TeacherDashboardSection data={data} />}
+                {user.role === "ADMIN" && data.admin && <AdminDashboardSection data={data} />}
+                {!data.student && !data.teacher && !data.admin && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Welcome</CardTitle>
+                      <CardDescription>
+                        Your role ({user.roleLabel}) doesn&apos;t have a specific dashboard yet.
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </div>
-      </header>
-
-      <main className="flex-1 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        {/* Mobile user badge */}
-        <div className="sm:hidden flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs font-medium">
-              {initials(user.name)}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-sm font-medium leading-tight">{user.name}</p>
-            <p className="text-xs text-muted-foreground leading-tight">
-              {user.email}
-            </p>
-          </div>
-        </div>
-
-        {/* Greeting */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-              {greeting}, {user.name.split(" ")[0]}!
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              You are signed in as{" "}
-              <Badge variant="secondary" className="font-normal">
-                {user.roleLabel}
-              </Badge>{" "}
-              · {stats.term}
-            </p>
-          </div>
-        </div>
-
-        {/* Stat cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                School accounts
-              </CardTitle>
-              <Users className="h-4 w-4 text-emerald-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">{stats.totalAccounts}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Registered portal users
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Current term
-              </CardTitle>
-              <BookOpen className="h-4 w-4 text-emerald-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">{stats.term}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Active academic period
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Today
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-emerald-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-semibold">
-                {new Date().toLocaleDateString(undefined, {
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {new Date().toLocaleTimeString(undefined, {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
-                local time
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Two-column layout on desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Announcements */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Megaphone className="h-4 w-4 text-emerald-600" />
-                <CardTitle className="text-base">Announcements</CardTitle>
-              </div>
-              <CardDescription>
-                Latest news from the school office.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {announcements.map((a) => (
-                <article
-                  key={a.id}
-                  className="border-l-2 border-emerald-200 pl-3 py-1"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-medium">{a.title}</h3>
-                    <time className="text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(a.date).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </time>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">{a.body}</p>
-                </article>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Quick actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Quick actions</CardTitle>
-              <CardDescription>Shortcuts for common tasks.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-3">
-              {quickActions.map((action) => {
-                const Icon = ACTION_ICONS[action.icon] ?? FileText;
-                return (
-                  <button
-                    key={action.id}
-                    type="button"
-                    className="flex flex-col items-center justify-center gap-2 rounded-lg border bg-background p-4 text-center hover:bg-accent hover:text-accent-foreground transition-colors min-h-[88px]"
-                  >
-                    <Icon className="h-5 w-5 text-emerald-600" />
-                    <span className="text-xs font-medium">{action.label}</span>
-                  </button>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </div>
-
-        <Alert>
-          <Megaphone className="h-4 w-4" />
-          <AlertDescription>
-            This is a Phase 1 foundation build — login, session-protected
-            dashboard, and logout. Role-specific modules (academics, dormitory,
-            cafeteria, finance) plug into this shell in later phases.
-          </AlertDescription>
-        </Alert>
-      </main>
-
-      <footer className="border-t bg-background">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between text-xs text-muted-foreground">
-          <span>© {new Date().getFullYear()} {stats.schoolName}</span>
-          <span>Signed in as {user.email}</span>
-        </div>
-      </footer>
+        </main>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
-// School portal — Phase 1 (identity + auth)
+// School portal â€” Phase 1 (identity + auth) + Phase 2 (academic core)
 // The uploaded architecture document recommends a modular monolith with one
-// shared user table. We model that core here. Later phases (students, classes,
-// dormitory, cafeteria, finance) add linked tables that reference User.
+// shared user table. We model that core here. Later phases (dormitory,
+// cafeteria, finance) add linked tables that reference the same User/Student.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,6 +12,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Identity (Phase 1)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -20,4 +24,127 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  // 1-1 profile links â€” populated only for the matching role
+  student        Student?
+  teacher        Teacher?
+
+  // Audit: who recorded this attendance / grade
+  recordedAttendance Attendance[]
+  recordedGrades     Grade[]
+}
+
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// People (Phase 2)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+model Student {
+  id              String   @id @default(cuid())
+  admissionNumber String   @unique
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gradeLevel      String   // e.g. "Grade 10"
+  guardianName    String?
+  guardianPhone   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  enrollments Enrollment[]
+  attendance  Attendance[]
+  grades      Grade[]
+}
+
+model Teacher {
+  id         String   @id @default(cuid())
+  employeeId String   @unique
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department String?  // e.g. "Mathematics"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  classes Class[]
+}
+
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Academics (Phase 2)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+model Subject {
+  id      String   @id @default(cuid())
+  name    String   @unique // e.g. "Mathematics"
+  code    String   @unique // e.g. "MATH"
+  classes Class[]
+}
+
+model Class {
+  id           String   @id @default(cuid())
+  name         String   @unique // e.g. "10A Mathematics"
+  subjectId    String
+  subject      Subject  @relation(fields: [subjectId], references: [id])
+  teacherId    String?
+  teacher      Teacher? @relation(fields: [teacherId], references: [id])
+  academicYear String   // e.g. "2025/2026"
+  term         String   // e.g. "Term 1"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  enrollments Enrollment[]
+  attendance  Attendance[]
+  assignments Assignment[]
+}
+
+model Enrollment {
+  id         String   @id @default(cuid())
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classId    String
+  class      Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime @default(now())
+
+  @@unique([studentId, classId])
+}
+
+model Attendance {
+  id           String   @id @default(cuid())
+  studentId    String
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classId      String
+  class        Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  date         DateTime // the school day (time component ignored)
+  status       String   // PRESENT | ABSENT | LATE | EXCUSED
+  recordedById String
+  recordedBy   User     @relation(fields: [recordedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@unique([studentId, classId, date])
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  dueDate     DateTime
+  maxScore    Float
+  createdAt   DateTime @default(now())
+
+  grades Grade[]
+
+  @@unique([classId, title])
+}
+
+model Grade {
+  id           String   @id @default(cuid())
+  studentId    String
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  score        Float
+  recordedById String
+  recordedBy   User     @relation(fields: [recordedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@unique([studentId, assignmentId])
 }
