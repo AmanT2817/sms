@@ -113,7 +113,7 @@ export function LoginForm() {
               <GraduationCap className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-semibold leading-tight">Greenfield Academy</p>
+              <p className="font-semibold leading-tight">Model School</p>
               <p className="text-xs text-white/70 leading-tight">School Portal</p>
             </div>
           </div>
@@ -156,7 +156,7 @@ export function LoginForm() {
           </motion.div>
 
           <p className="text-xs text-white/60">
-            © {new Date().getFullYear()} Greenfield Academy. All rights reserved.
+            © {new Date().getFullYear()} Model School. All rights reserved.
           </p>
         </div>
       </div>
@@ -177,7 +177,7 @@ export function LoginForm() {
               <GraduationCap className="h-7 w-7 text-white" />
             </div>
             <h1 className="mt-3 text-xl font-semibold tracking-tight">
-              Greenfield Academy
+              Model School
             </h1>
             <p className="text-sm text-muted-foreground">School Portal</p>
           </div>

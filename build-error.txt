@@ -1,0 +1,37 @@
+
+> nextjs_tailwind_shadcn_ts@0.2.1 build
+> next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/
+
+▲ Next.js 16.1.3 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 12.3s
+  Skipping validation of types
+  Collecting page data using 7 workers ...
+Error: Failed to load external module @prisma/client-2c3a283f134fdcb6: Error: Cannot find module '.prisma/client/default'
+Require stack:
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\node_modules\@prisma\client\default.js
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[root-of-the-server]__9e2f4c97._.js
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[turbopack]_runtime.js
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\app\api\auth\me\route.js
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\node_modules\next\dist\server\require.js
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\node_modules\next\dist\server\load-components.js
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\node_modules\next\dist\build\utils.js
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\node_modules\next\dist\build\worker.js
+- C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\node_modules\next\dist\compiled\jest-worker\processChild.js
+    at Context.externalRequire [as x] (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[turbopack]_runtime.js:535:15)
+    at module evaluation (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[root-of-the-server]__9e2f4c97._.js:1:1017)
+    at instantiateModule (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[turbopack]_runtime.js:228:20)
+    at module evaluation (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[root-of-the-server]__9e2f4c97._.js:1:1133)
+    at instantiateModule (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[turbopack]_runtime.js:763:12)
+    at Context.esmImport [as i] (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[turbopack]_runtime.js:228:20)
+    at module evaluation (C:\Users\TADESSE KABTAMU\OneDrive\Desktop\apps\projetcs\sms\.next\server\chunks\[root-of-the-server]__9e2f4c97._.js:1:1895)
+
+> Build error occurred
+Error: Failed to collect page data for /api/dashboard
+    at ignore-listed frames {
+  type: 'Error'
+}

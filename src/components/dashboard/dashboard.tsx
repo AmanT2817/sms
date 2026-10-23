@@ -118,7 +118,7 @@ export function Dashboard() {
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-background via-background to-emerald-50/30 dark:to-emerald-950/10">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-background via-background to-emerald-50/30 dark:to-emerald-950/10 overflow-x-hidden">
       <Sidebar
         user={user}
         schoolName={stats.schoolName}

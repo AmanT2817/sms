@@ -43,7 +43,7 @@ export async function GET() {
     },
     stats: {
       term: "Term 1, 2025/2026",
-      schoolName: "Greenfield Academy",
+      schoolName: "Model School",
     },
     announcements: [
       {

@@ -1,4 +1,4 @@
-# Greenfield Academy — School Portal (Phase 1 + Phase 2)
+# Model School — School Portal (Phase 1 + Phase 2)
 
 A working school website with a **login page**, **session-protected role-based dashboards**, and **logout**.
 Built as Phase 1 (identity + auth) and Phase 2 (academic core) of the broader School Management
