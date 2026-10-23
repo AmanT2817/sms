@@ -31,6 +31,7 @@ import {
   StaggerItem,
   GlassCard,
 } from "@/components/ui/animated";
+import { CsvImportButton } from "@/components/admin/csv-import-button";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared types
@@ -498,6 +499,21 @@ export function AdminDashboardSection({ data }: { data: DashboardData }) {
           <StatCard label="Grades" value={<AnimatedCounter value={a.stats.totalGrades} />} icon={TrendingUp} accent="cyan" />
         </StaggerItem>
       </div>
+
+      {/* Admin quick actions bar */}
+      <StaggerItem>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/60 bg-card/50 backdrop-blur p-3">
+          <div>
+            <p className="text-sm font-medium">User administration</p>
+            <p className="text-xs text-muted-foreground">
+              Add a single user or import many from a CSV file.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <CsvImportButton />
+          </div>
+        </div>
+      </StaggerItem>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Activity feed */}

@@ -164,7 +164,7 @@ export function LoginForm() {
       {/* ────────────────────────────────────────────────────────────────────
           Right form panel
          ──────────────────────────────────────────────────────────────────── */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-slate-50 via-emerald-50/40 to-cyan-50/30">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-background via-emerald-50/40 dark:via-emerald-950/20 to-cyan-50/30 dark:to-cyan-950/20">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -182,7 +182,7 @@ export function LoginForm() {
             <p className="text-sm text-muted-foreground">School Portal</p>
           </div>
 
-          <div className="rounded-2xl border border-white/60 bg-white/80 backdrop-blur-xl shadow-xl shadow-emerald-900/5 p-6 sm:p-8">
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl shadow-xl shadow-emerald-900/5 p-6 sm:p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-semibold tracking-tight">Welcome back</h2>
               <p className="text-sm text-muted-foreground mt-1">
@@ -224,7 +224,7 @@ export function LoginForm() {
                   aria-describedby={errors.email ? "email-error" : undefined}
                   disabled={submitting}
                   required
-                  className="h-11 rounded-xl bg-white/70 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 transition-colors"
+                  className="h-11 rounded-xl bg-background/90 dark:bg-input/40 border-border focus:border-emerald-500 focus:ring-emerald-500/20 transition-colors text-foreground placeholder:text-muted-foreground"
                 />
                 {errors.email && (
                   <p id="email-error" className="text-sm text-destructive">
@@ -254,7 +254,7 @@ export function LoginForm() {
                   }
                   disabled={submitting}
                   required
-                  className="h-11 rounded-xl bg-white/70 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 transition-colors"
+                  className="h-11 rounded-xl bg-background/90 dark:bg-input/40 border-border focus:border-emerald-500 focus:ring-emerald-500/20 transition-colors text-foreground placeholder:text-muted-foreground"
                 />
                 {errors.password && (
                   <p id="password-error" className="text-sm text-destructive">
@@ -282,11 +282,11 @@ export function LoginForm() {
               </Button>
             </form>
 
-            <div className="mt-6 p-3 rounded-xl bg-emerald-50/70 border border-emerald-100">
+            <div className="mt-6 p-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
               <p className="text-xs text-muted-foreground text-center">
-                <span className="font-medium text-emerald-700">Demo accounts</span>{" "}
+                <span className="font-medium text-emerald-700 dark:text-emerald-400">Demo accounts</span>{" "}
                 (password{" "}
-                <code className="font-mono bg-white/60 px-1 rounded">
+                <code className="font-mono bg-background/60 px-1 rounded">
                   password123
                 </code>
                 ):

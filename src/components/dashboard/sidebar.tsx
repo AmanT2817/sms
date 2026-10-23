@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useToast } from "@/hooks/use-toast";
 
 export interface NavItem {
   id: string;
@@ -83,14 +84,28 @@ function SidebarContent({
   onLogout,
   loggingOut,
   collapsed,
-  activeId = "dashboard",
+  activeId,
+  onSelectItem,
   onItemClick,
 }: SidebarProps & {
   collapsed: boolean;
-  activeId?: string;
+  activeId: string;
+  onSelectItem: (id: string) => void;
   onItemClick?: () => void;
 }) {
   const navItems = getNavItems(user.role);
+
+  function handleSelect(id: string, label: string) {
+    onSelectItem(id);
+    onItemClick?.();
+    // For non-dashboard items, show a "coming soon" note — they're placeholders
+    // for later phases. The Dashboard itself is fully functional.
+    if (id !== "dashboard") {
+      // Toasts are queued via the toast hook in the parent Sidebar component,
+      // but we can also fire one here if we lift the hook. For now, the active
+      // state changes visually so the click is acknowledged.
+    }
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -115,8 +130,8 @@ function SidebarContent({
             <button
               key={item.id}
               type="button"
-              onClick={onItemClick}
-              className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all relative group ${
+              onClick={() => handleSelect(item.id, item.label)}
+              className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all relative group cursor-pointer ${
                 collapsed ? "justify-center" : ""
               } ${
                 isActive
@@ -124,6 +139,7 @@ function SidebarContent({
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
               }`}
               title={collapsed ? item.label : undefined}
+              aria-current={isActive ? "page" : undefined}
             >
               {isActive && (
                 <motion.div
@@ -182,6 +198,24 @@ function SidebarContent({
 export function Sidebar(props: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeId, setActiveId] = useState("dashboard");
+  const { toast } = useToast();
+
+  function handleSelectItem(id: string) {
+    const previousId = activeId;
+    setActiveId(id);
+    // Acknowledge the click. For non-dashboard items, show a "coming soon"
+    // toast so the user understands why nothing else changed.
+    if (id !== "dashboard" && id !== previousId) {
+      const navItems = getNavItems(props.user.role);
+      const item = navItems.find((n) => n.id === id);
+      toast({
+        title: `${item?.label ?? "Section"} — coming soon`,
+        description:
+          "This module is part of a later phase. The Dashboard is fully functional.",
+      });
+    }
+  }
 
   return (
     <>
@@ -189,15 +223,20 @@ export function Sidebar(props: SidebarProps) {
       <motion.aside
         animate={{ width: collapsed ? 72 : 256 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="hidden lg:flex flex-col bg-sidebar border-r border-sidebar-border shrink-0 sticky top-0 h-screen"
+        className="hidden lg:flex flex-col bg-sidebar border-r border-sidebar-border shrink-0 sticky top-0 h-screen relative"
       >
-        <SidebarContent {...props} collapsed={collapsed} />
+        <SidebarContent
+          {...props}
+          collapsed={collapsed}
+          activeId={activeId}
+          onSelectItem={handleSelectItem}
+        />
 
         {/* Collapse toggle */}
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 z-10 h-6 w-6 rounded-full bg-background border border-border shadow-sm flex items-center justify-center hover:bg-accent transition-colors"
+          className="absolute -right-3 top-20 z-10 h-6 w-6 rounded-full bg-background border border-border shadow-sm flex items-center justify-center hover:bg-accent transition-colors cursor-pointer"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <ChevronLeft
@@ -249,7 +288,7 @@ export function Sidebar(props: SidebarProps) {
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="absolute right-3 top-4 z-10 h-8 w-8 rounded-lg hover:bg-accent flex items-center justify-center"
+                className="absolute right-3 top-4 z-10 h-8 w-8 rounded-lg hover:bg-accent flex items-center justify-center cursor-pointer"
                 aria-label="Close menu"
               >
                 <X className="h-4 w-4" />
@@ -257,6 +296,8 @@ export function Sidebar(props: SidebarProps) {
               <SidebarContent
                 {...props}
                 collapsed={false}
+                activeId={activeId}
+                onSelectItem={handleSelectItem}
                 onItemClick={() => setMobileOpen(false)}
               />
             </motion.aside>
